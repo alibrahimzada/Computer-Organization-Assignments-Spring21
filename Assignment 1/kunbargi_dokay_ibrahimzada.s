@@ -5,18 +5,19 @@ main_menu:          .asciiz "\nMain Menu:\n1. Count Alphabetic Characters\n2. So
 q1_enter_string:    .asciiz "\nEnter the String: "
 termination:        .asciiz "Program ends. Bye :)"
 line_break:         .asciiz "\n"
-space:              .ascii " "
-
+char_occurrence:    .asciiz "Character Occurrence\n"
+space:              .asciiz " "
 
     .text
     .globl main
 
-main:
-    li $v0, 4
+main:   # this is the starting point of the program
+
+    li $v0, 4   # printing the welcome message on standard output
     la $a0, welcome_message
     syscall
 
-main_while:
+main_while: # this is an inifinite loop which keeps the program running until user chooses 5 to Exit
 
     li $v0, 4   # print the main menu on standard output
     la $a0, main_menu
@@ -25,58 +26,72 @@ main_while:
     li $v0, 5   # get user choice and place it in $v0
     syscall
 
-    add $t0, $v0, $zero   # assign user choice to $t0
+    add $t0, $v0, $zero # assign user choice to $t0
 
-case_1:
+case_1: # case 1 corresponds to counting occurrences of a character in a string
 
-    addi $t1, $zero, 1   # assign 1 to $1 for case testing
+    addi $t1, $zero, 1   # assign 1 to $t1 for case testing
     bne $t0, $t1, case_2   # branch to case 2 if the user did not enter 1
 
-    li $v0, 4   # print string to standard output
+    li $v0, 4   # print string (i.e., Enter the String: ) to standard output
     la $a0, q1_enter_string
     syscall
 
-    li $v0, 8   # get string from user
+    li $v0, 8   # get string from user and place it in $a0
     syscall
 
-    jal q1
+    jal q1  # jump to q1 label
 
-    j main_while
+    j main_while    # restart with main menu and ask user for input
 
-case_2:
-    addi $t1, $zero, 2
-    bne $t0, $t1, case_3
+case_2: # case 2 corresponds to sorting a sequence of unordered numbers in a string
 
-    j main_while
+    addi $t1, $zero, 2  # assign 2 to $t1 for case testing
+    bne $t0, $t1, case_3    # branch to case 3 if the user did not enter 2
 
-case_3:
-    addi $t1, $zero, 3
-    bne $t0, $t1, case_4
+    ### Alper please do the necessary input taking and calling q2 below (check case 1 for reference)
 
-    j main_while
+    ### Alper please finish your code before this line
 
-case_4:
-    addi $t1, $zero, 4
-    bne $t0, $t1, case_5
+    j main_while    # restart with main menu and ask user for input
 
-    j main_while
+case_3: # case 3 corresponds to finding the number of prime numbers
 
-case_5:   # if the user choice is not either of 1, 2, 3, and 4, then it should be definitely 5
-    li $v0, 4
+    addi $t1, $zero, 3  # assign 3 to $t1 for case testing
+    bne $t0, $t1, case_4    # branch to case 4 if the user did not enter 3
+
+    ### Sameeh please do the necessary input taking and calling q3 below (check case 1 for reference)
+
+    ### Sameeh please finish your code before this line
+
+    j main_while    # restart with main menu and ask user for input
+
+case_4: # case 4 corresponds to constructing Huffman Code Tree
+
+    addi $t1, $zero, 4  # assign 4 to $t1 for case testing
+    bne $t0, $t1, case_5    # branch to case 5 if the user did not enter 4
+
+    j main_while    # restart with main menu and ask user for input
+
+case_5: # if the user choice is not either of 1, 2, 3, and 4, then it should be definitely 5
+
+    li $v0, 4   # print goodbye state
     la $a0, termination
     syscall
 
-    li $v0, 10   # terminating the process
+    li $v0, 10  # terminating the process
     syscall
+    
+    # end of program
 
 q1:
-    addi $sp, $sp, -8   # creating space to preserve the values of arguments
-    sw $a0, 4($sp)
+    addi $sp, $sp, -8   # creating space to preserve the values of arguments (i.e., $a0, $a1, etc.)
+    sw $a0, 4($sp)  # pushing arguments to stack
     sw $a1, 0($sp)
-    addi $sp, $sp, -104   # creating stack frame for english alphabets (26 * 4)
+    addi $sp, $sp, -104   # creating stack frame for english alphabets (26 * 4 = 104 bytes)
 
     li $t0, 0
-    li $t1, 26
+     li $t1, 26
 
 q1_prepare_stack:
     beq $t0, $t1, q1_finish_preparing_stack
@@ -137,6 +152,13 @@ q1_loop_next_iter:
     j q1_count_loop
 
 q1_print:
+    #move $a0, $sp
+    #li $a1, 26
+    #jal isort
+
+    li $v0, 4
+    la $a0, char_occurrence
+    syscall
 
     li $t0, 0
     li $s1, 26
@@ -178,3 +200,86 @@ q1_exit:
     lw $a0, 4($sp)
     addi $sp, $sp, 8
     jr $ra
+
+isort:
+    addi $sp, $sp, -4
+    sw	$ra, 0($sp)
+
+    add $s0, $a0, $zero
+    li $s1, 0
+
+    addi $s2, $a1, -1
+
+isort_for:
+    bge $s1, $s2, isort_exit	# if i >= length-1 -> exit loop
+		
+    move $a0, $s0		# base address
+    move $a1, $s1		# i
+    move $a2, $s2		# length - 1
+    
+    jal	mini
+    move	$s3, $v0		# return value of mini
+    
+    move	$a0, $s0		# array
+    move	$a1, $s1		# i
+    move	$a2, $s3		# mini
+    
+    jal	swap
+
+    addi	$s1, $s1, 1		# i += 1
+    j	isort_for		# go back to the beginning of the loop
+		
+isort_exit:
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
+    jr $ra
+
+mini:
+
+    add $t0, $a0, $zero		# base of the array
+    add $t1, $a1, $zero		# mini = first = i
+    add $t2, $a2, $zero		# last
+    
+    sll	$t3, $t1, 2		# first * 4
+    add	$t3, $t3, $t0		# index = base array + first * 4		
+    lw	$t4, 0($t3)		# min = v[first]
+    
+    addi	$t5, $t1, 1		# i = 0
+
+mini_for:
+
+    bgt	$t5, $t2, mini_end	# go to min_end
+
+	sll	$t6, $t5, 2		# i * 4
+	add	$t6, $t6, $t0		# index = base array + i * 4		
+	lw	$t7, 0($t6)		# v[index]
+
+	bge	$t7, $t4, mini_if_exit	# skip the if when v[i] >= min
+		
+	move	$t1, $t5		# mini = i
+	move	$t4, $t7		# min = v[i]
+
+mini_if_exit:
+
+    addi $t5, $t5, 1		# i += 1
+	j mini_for
+
+mini_end:
+    move $v0, $t1		# return mini
+	jr	$ra
+
+swap:
+
+    sll	$t1, $a1, 2		# i * 4
+    add	$t1, $a0, $t1		# v + i * 4
+    
+    sll	$t2, $a2, 2		# j * 4
+    add	$t2, $a0, $t2		# v + j * 4
+
+    lw	$t0, 0($t1)		# v[i]
+    lw	$t3, 0($t2)		# v[j]
+
+    sw	$t3, 0($t1)		# v[i] = v[j]
+    sw	$t0, 0($t2)		# v[j] = $t0
+
+    jr	$ra
