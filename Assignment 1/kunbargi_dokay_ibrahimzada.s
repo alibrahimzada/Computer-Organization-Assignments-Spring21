@@ -171,17 +171,21 @@ q1_loop_next_iter:  # this is used to increment the loop variable because we ski
 q1_print:   # we use this to print the sorted frequencies from stack
 
     ### necessary calls to sorting should be made here
+    add $a0, $sp, $zero
+    li $a1, 0
+    addi $a1, $a1, 26
+
+    jal isort
 
     li $v0, 4   # print the header (i.e., character     occurrence)
     la $a0, char_occurrence
     syscall
 
-    li $t0, 0   # initialize loop variable with 0
-    li $s1, 26  # initialize $s1 with the maximum number of loop iterations
+    li $t0, 25   # initialize loop variable with 26
 
 q1_print_loop:
 
-    beq $t0, $s1, q1_exit   # check if we have printed all possible alphabets
+    beq $t0, $zero, q1_exit   # check if we have printed all possible alphabets
 
     sll $t1, $t0, 2 # align the loop variable with 4 bytes
     add $t1, $t1, $sp   # get the specific address from stack
@@ -208,12 +212,12 @@ q1_print_loop:
     la $a0, line_break
     syscall
 
-    addi $t0, $t0, 1    # increment the loop variable and continue with next iteration
+    addi $t0, $t0, -1    # decrement the loop variable and continue with next iteration
     j q1_print_loop
 
-q1_print_loop_skip: # here we increment the loop variable and start from the beginning of the loop
+q1_print_loop_skip: # here we decrement the loop variable and start from the beginning of the loop
 
-    addi $t0, $t0, 1
+    addi $t0, $t0, -1
     j q1_print_loop
 
 q1_exit:    # here marks the end of question 1
@@ -222,7 +226,90 @@ q1_exit:    # here marks the end of question 1
     lw $a1, 0($sp)  # restore the arguments from stack
     lw $a0, 4($sp)
     addi $sp, $sp, 8
-    jr $ra  # jump back to main menu loop
+    j main_while  # jump back to main menu loop
+
+# selection_sort
+isort:		addi	$sp, $sp, -4		# save values on stack
+		sw	$ra, 0($sp)
+
+		move 	$s0, $a0		# base address of the array
+		move	$s1, $zero		# i=0
+
+		addi	$s2, $a1, -1		# lenght -1
+
+isort_for:	bge 	$s1, $s2, isort_exit	# if i >= length-1 -> exit loop
+		
+		move	$a0, $s0		# base address
+		move	$a1, $s1		# i
+		move	$a2, $s2		# length - 1
+		
+		jal	mini
+		move	$s3, $v0		# return value of mini
+		
+		move	$a0, $s0		# array
+		move	$a1, $s1		# i
+		move	$a2, $s3		# mini
+		
+		jal	swap
+
+		addi	$s1, $s1, 1		# i += 1
+		j	isort_for		# go back to the beginning of the loop
+		
+isort_exit:	lw	$ra, 0($sp)		# restore values from stack
+		addi	$sp, $sp, 4		# restore stack pointer
+		jr	$ra			# return
+
+
+# index_minimum routine
+mini:		move	$t0, $a0		# base of the array
+		move	$t1, $a1		# mini = first = i
+		move	$t2, $a2		# last
+		
+		sll	$t3, $t1, 2		# first * 4
+		add	$t3, $t3, $t0		# index = base array + first * 4		
+		lw	$t4, 0($t3)		# min = v[first]
+
+        ### the following instruction is specific to Q1
+        andi $t4, $t4, 0x0FFF
+        ###
+		
+		addi	$t5, $t1, 1		# i = 0
+mini_for:	bgt	$t5, $t2, mini_end	# go to min_end
+
+		sll	$t6, $t5, 2		# i * 4
+		add	$t6, $t6, $t0		# index = base array + i * 4		
+		lw	$t7, 0($t6)		# v[index]
+
+        ### the following instruction is specific to Q1
+        andi $t7, $t7, 0x0FFF
+        ###
+
+		bge	$t7, $t4, mini_if_exit	# skip the if when v[i] >= min
+		
+		move	$t1, $t5		# mini = i
+		move	$t4, $t7		# min = v[i]
+
+mini_if_exit:	addi	$t5, $t5, 1		# i += 1
+		j	mini_for
+
+mini_end:	move 	$v0, $t1		# return mini
+		jr	$ra
+
+
+# swap routine
+swap:		sll	$t1, $a1, 2		# i * 4
+		add	$t1, $a0, $t1		# v + i * 4
+		
+		sll	$t2, $a2, 2		# j * 4
+		add	$t2, $a0, $t2		# v + j * 4
+
+		lw	$t0, 0($t1)		# v[i]
+		lw	$t3, 0($t2)		# v[j]
+
+		sw	$t3, 0($t1)		# v[i] = v[j]
+		sw	$t0, 0($t2)		# v[j] = $t0
+
+		jr	$ra
 
 q3:
     add $s0, $zero, $zero # False variable
