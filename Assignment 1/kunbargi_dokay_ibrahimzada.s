@@ -425,12 +425,12 @@ q3:
 
 # initilize array with ones in stack 
 q3_array:
-    sw	$s1, 0($sp)	# write ones to the stackpointer's address
-	addi $t1, $t1, 1	# increment counter variable
-	addi $sp, $sp, -4	# subtract 4 bytes from stackpointer (push)
+    sw	$s1, 0($sp)	# we start with filling all words with 1
+	addi $t1, $t1, 1	# increment the loop variable
+	addi $sp, $sp, -4	# here we add 1 more word in stack by subtracting the stack pointer
     
     slt $t5, $t1, $t0
-	bne	$t5, $zero, q3_array	# take loop while $t1 <= $t0 ( p <= N )
+	bne	$t5, $zero, q3_array	# loop shall continue until p <= N
 
     li $t1, 1 # counter p reseted to 1
     
@@ -441,12 +441,12 @@ q3_outer_while:
     slt $t5, $t0, $t2
     bne $t5, $zero, q3_precounter # exit loop if p*p > N 
 
-    add	$t4, $s3, $zero	# save the bottom of stack address to $t4
-	mul	$t3, $t1, 4	# calculate the number of bytes to jump over t1=p
-	sub	$t4, $t4, $t3	# subtract them from bottom of stack address, save prime[p] -> t4
-	add	$t4, $t4, 8	# add 2 words, we started counting from 2
+    add	$t4, $s3, $zero	# we store the bottom of stack pointer to $t4
+	mul	$t3, $t1, 4	# aligning according word in order to jump over t1=p
+	sub	$t4, $t4, $t3	# subtract the value of $t3 from the bottom of stack pointer
+	add	$t4, $t4, 8	# we need to add 8 bytes since the first prime number is 2
 
-	lw	$t3, 0($t4)	# load the content into $t3
+	lw	$t3, 0($t4)	# load the value into $t3
 	beq	$t3, $s1, q3_inner_for	# go to the inner loop if prime[p] == true
     
     j q3_outer_while
@@ -454,12 +454,12 @@ q3_outer_while:
 q3_inner_for:
     #for i in range(p * p, n+1, p):
     #       prime[i] = False
-    add	$t4, $s3, 0	# save the bottom of stack address -> $t4
-	mul	$t3, $t2, 4	# calculate the number of bytes to jump over
-	sub	$t4, $t4, $t3	# subtract them from bottom of stack address
-	add	$t4, $t4, 8	# add 2 words, we started counting from 2
+    add	$t4, $s3, 0	# we store the bottom of stack pointer to $t4
+	mul	$t3, $t2, 4	# aligning according word in order to jump over
+	sub	$t4, $t4, $t3	# subtract the value of $t3 from the bottom of stack pointer
+	add	$t4, $t4, 8	# we need to add 8 bytes since the first prime number is 2
 
-	sw	$s0, ($t4)	# store false there ( 0's ) because it's not a prime number
+	sw	$s0, 0($t4)	# store false there ( 0's ) because it's not a prime number
 
 	add	$t2, $t2, $t1	# keep doing this for every multiple of $t1
 
@@ -473,12 +473,12 @@ q3_precounter:
 
 q3_counter:
 
-    add	$t4, $s3, 0	# save the bottom of stack address to $t4
-	mul	$t3, $t9, 4	# calculate the number of bytes to jump over t1=p
-	sub	$t4, $t4, $t3	# subtract them from bottom of stack address save prime[p] in t4
-	add	$t4, $t4, 8	# add 2 words, we started counting from 2
+    add	$t4, $s3, 0	# we store the bottom of stack pointer to $t4
+	mul	$t3, $t9, 4	# aligning according word in order to jump over
+	sub	$t4, $t4, $t3	# subtract the value of $t3 from the bottom of stack pointer
+	add	$t4, $t4, 8	# we need to add 8 bytes since the first prime number is 2
 
-	lw	$t3, ($t4)	# load the content into $t3
+	lw	$t3, 0($t4)	# load the content into $t3
     addi $t9, $t9, 1 # increament t9
 
 	beq	$t3, $s1, q3_if_counter	# increment prime counter if prime[p] == true
