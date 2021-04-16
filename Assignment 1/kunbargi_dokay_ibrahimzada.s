@@ -182,8 +182,9 @@ q1_print:   # we use this to print the sorted frequencies from stack
     add $a0, $sp, $zero
     li $a1, 0
     addi $a1, $a1, 26
+    li $a2, 0
 
-    jal isort
+    jal sort_algorithm
 
     li $v0, 4   # print the header (i.e., character     occurrence)
     la $a0, char_occurrence
@@ -235,89 +236,6 @@ q1_exit:    # here marks the end of question 1
     lw $a0, 4($sp)
     addi $sp, $sp, 8
     j main_while  # jump back to main menu loop
-
-# selection_sort
-isort:		addi	$sp, $sp, -4		# save values on stack
-		sw	$ra, 0($sp)
-
-		move 	$s0, $a0		# base address of the array
-		move	$s1, $zero		# i=0
-
-		addi	$s2, $a1, -1		# lenght -1
-
-isort_for:	bge 	$s1, $s2, isort_exit	# if i >= length-1 -> exit loop
-		
-		move	$a0, $s0		# base address
-		move	$a1, $s1		# i
-		move	$a2, $s2		# length - 1
-		
-		jal	mini
-		move	$s3, $v0		# return value of mini
-		
-		move	$a0, $s0		# array
-		move	$a1, $s1		# i
-		move	$a2, $s3		# mini
-		
-		jal	swap
-
-		addi	$s1, $s1, 1		# i += 1
-		j	isort_for		# go back to the beginning of the loop
-		
-isort_exit:	lw	$ra, 0($sp)		# restore values from stack
-		addi	$sp, $sp, 4		# restore stack pointer
-		jr	$ra			# return
-
-
-# index_minimum routine
-mini:		move	$t0, $a0		# base of the array
-		move	$t1, $a1		# mini = first = i
-		move	$t2, $a2		# last
-		
-		sll	$t3, $t1, 2		# first * 4
-		add	$t3, $t3, $t0		# index = base array + first * 4		
-		lw	$t4, 0($t3)		# min = v[first]
-
-        ### the following instruction is specific to Q1
-        andi $t4, $t4, 0x0FFF
-        ###
-		
-		addi	$t5, $t1, 1		# i = 0
-mini_for:	bgt	$t5, $t2, mini_end	# go to min_end
-
-		sll	$t6, $t5, 2		# i * 4
-		add	$t6, $t6, $t0		# index = base array + i * 4		
-		lw	$t7, 0($t6)		# v[index]
-
-        ### the following instruction is specific to Q1
-        andi $t7, $t7, 0x0FFF
-        ###
-
-		bge	$t7, $t4, mini_if_exit	# skip the if when v[i] >= min
-		
-		move	$t1, $t5		# mini = i
-		move	$t4, $t7		# min = v[i]
-
-mini_if_exit:	addi	$t5, $t5, 1		# i += 1
-		j	mini_for
-
-mini_end:	move 	$v0, $t1		# return mini
-		jr	$ra
-
-
-# swap routine
-swap:		sll	$t1, $a1, 2		# i * 4
-		add	$t1, $a0, $t1		# v + i * 4
-		
-		sll	$t2, $a2, 2		# j * 4
-		add	$t2, $a0, $t2		# v + j * 4
-
-		lw	$t0, 0($t1)		# v[i]
-		lw	$t3, 0($t2)		# v[j]
-
-		sw	$t3, 0($t1)		# v[i] = v[j]
-		sw	$t0, 0($t2)		# v[j] = $t0
-
-		jr	$ra
 
 
 # Initiation of q2
@@ -449,7 +367,8 @@ q2_save_value_last:
 
     move	$a0, $sp # $a0=base address af the array
 	move	$a1, $s2 # $a1=size of the array
-    jal	q2_isort # call sorting func
+    li      $a2, 1
+    jal	sort_algorithm # call sorting func
     j q2_print_array # print after sorting
 
 # Here is the place where we check negativity for the last value
@@ -464,89 +383,6 @@ q2_make_negative_last:
 
 q2_exit:
     j main_while  # jump back to main menu loop
-
-
-q2_isort:	
-        addi	$sp, $sp, -4		# save values on stack
-		sw	$ra, 0($sp)
-
-		move 	$s0, $a0		# base address of the array
-		move	$s1, $zero		# i=0
-
-		addi	$s2, $a1, -1		# lenght -1
-
-q2_isort_for:	
-        bge 	$s1, $s2, q2_isort_exit	# if i >= length-1 -> exit loop
-		
-		move	$a0, $s0		# base address
-		move	$a1, $s1		# i
-		move	$a2, $s2		# length - 1
-		
-		jal	q2_mini
-		move	$s3, $v0		# return value of mini
-		
-		move	$a0, $s0		# array
-		move	$a1, $s1		# i
-		move	$a2, $s3		# mini
-		
-		jal	q2_swap
-
-		addi	$s1, $s1, 1		# i += 1
-		j	q2_isort_for		# go back to the beginning of the loop
-		
-q2_isort_exit:	
-        lw	$ra, 0($sp)		# restore values from stack
-		addi	$sp, $sp, 4		# restore stack pointer
-		jr	$ra			# return
-
-
-# index_minimum routine
-q2_mini:		
-        move	$t0, $a0		# base of the array
-		move	$t1, $a1		# mini = first = i
-		move	$t2, $a2		# last
-		
-		sll	$t3, $t1, 2		# first * 4
-		add	$t3, $t3, $t0		# index = base array + first * 4		
-		lw	$t4, 0($t3)		# min = v[first]
-		
-		addi	$t5, $t1, 1		# i = 0
-
-q2_mini_for:	
-        bgt	$t5, $t2, q2_mini_end	# go to min_end
-
-		sll	$t6, $t5, 2		# i * 4
-		add	$t6, $t6, $t0		# index = base array + i * 4		
-		lw	$t7, 0($t6)		# v[index]
-
-		bge	$t7, $t4, q2_mini_if_exit	# skip the if when v[i] >= min
-		
-		move	$t1, $t5		# mini = i
-		move	$t4, $t7		# min = v[i]
-
-q2_mini_if_exit:	
-        addi	$t5, $t5, 1		# i += 1
-		j	q2_mini_for
-
-q2_mini_end:	move 	$v0, $t1		# return mini
-		jr	$ra
-
-
-# swap routine
-q2_swap:		
-        sll	$t1, $a1, 2		# i * 4
-		add	$t1, $a0, $t1		# v + i * 4
-		
-		sll	$t2, $a2, 2		# j * 4
-		add	$t2, $a0, $t2		# v + j * 4
-
-		lw	$t0, 0($t1)		# v[i]
-		lw	$t3, 0($t2)		# v[j]
-
-		sw	$t3, 0($t1)		# v[i] = v[j]
-		sw	$t0, 0($t2)		# v[j] = $t0
-
-		jr	$ra
 
 # Here is the place where we print the values in stack (aka array)
 q2_print_array:
@@ -671,3 +507,86 @@ q3_exit:
 	syscall		
 
     jr	$ra		# exit q3
+
+sort_algorithm:
+    addi $sp, $sp, -4		# create space for return address on stack
+    sw $ra, 0($sp)          # store return address
+    add $s0, $a0, $zero		# base address of the stack
+    add $s1, $zero, $zero	# loop variable i initialized to 0
+    addi $s2, $a1, -1		# lenght -= 1
+    add $s4, $a2, $zero     # boolean variable to differentiate between q1 and q2 sorting
+
+sort_loop:
+    slt $t0, $s1, $s2       # $t0 = (i < length - 1)
+    beq $t0, $zero, sort_end# if previous condition is false, then exit the loop
+
+    # here we store some values to arguments before calling get_minimum_index()
+    add $a0, $s0, $zero		# base address of the stack
+    add $a1, $s1, $zero     # loop variable i
+    add $a2, $s2, $zero		# length - 1
+    add $a3, $s4, $zero     # assigning the boolean variable to $a3
+    
+    jal	get_minimum_index   # calling the procedure to find the index of the smallest element
+    add $s3, $v0, $zero		# assign the return value to $s3
+
+    # we perform swapping in the following
+    sll	$t1, $s1, 2     # multiply the value of first index by 4 for word alignment purposes
+	add	$t1, $s0, $t1   # add it with the base of stack to get the exact location
+    sll	$t2, $s3, 2		# multiply the value of second index by 4 for word alignment purposes
+    add	$t2, $s0, $t2	# add it with the base of stack to get the exact location
+    lw $t0, 0($t1)		# load the value at address $t1
+    lw $t3, 0($t2)		# load the value at address $t2
+    sw $t3, 0($t1)		# swapping happens here
+    sw $t0, 0($t2)		# swapping happens here
+
+    addi $s1, $s1, 1		# i += 1
+    j sort_loop		# go back to the beginning of the loop
+		
+sort_end:
+    lw $ra, 0($sp)		# restore value from stack
+	addi $sp, $sp, 4	# restore stack pointer
+	jr $ra			    # return to caller
+
+get_minimum_index:		# this procedure is used to get the index of the smallest element in stack
+    add $t0, $a0, $zero		# base of the stack
+	add $t1, $a1, $zero		# first index = i
+	add $t2, $a2, $zero		# length - 1
+    add $t8, $a3, $zero     # assign the boolean variable to $t8
+
+    sll	$t3, $t1, 2		# multiply the current index by 4 for alignment
+    add	$t3, $t3, $t0	# add to the base of stack for getting the exact location
+    lw	$t4, 0($t3)		# load the value into $t4
+
+    beq $t8, $zero, q1_mask_outer   # mask out the upper 8-bits if necessary
+
+get_minimum_index_cont:
+	addi $t5, $t1, 1		# i = 0
+
+get_minimum_index_loop:
+    bgt	$t5, $t2, get_minimum_index_end # ending the loop
+    sll	$t6, $t5, 2 # multiply the current index by 4 for alignment
+    add	$t6, $t6, $t0   # add it to the base of stack for getting the exact location
+    lw	$t7, 0($t6) # load the value into $t7
+    beq $t8, $zero, q1_mask_inner   # mask out the upper 8-buts if necessary
+
+get_minimum_index_loop_cont:
+    slt $t9, $t7, $t4       # $t9 = ($t7 < $t4)
+    beq	$t9, $zero, get_minimum_index_skip	# skip if the value of the current index is bigger than min index
+    add $t1, $t5, $zero		# assign the minimum index to $t1
+    add $t4, $t7, $zero		# update the value of minimum index
+
+get_minimum_index_skip:
+    addi $t5, $t5, 1		# incrementing the loop variable
+	j get_minimum_index_loop    # start over from the beginning of the loop
+
+get_minimum_index_end:  # the loop condition has failed and here terminate the loop	
+    add $v0, $t1, $zero		# return the minimum element's index
+	jr $ra              # jump back to caller
+
+q1_mask_outer:          # this is used to mask out the upper 8-bits of the word
+    andi $t4, $t4, 0x0FFF
+    j get_minimum_index_cont    # continue back from get_minimum_index procedure
+
+q1_mask_inner:          # this is used to mask out the upper 8-bits of the word
+    andi $t7, $t7, 0x0FFF
+    j get_minimum_index_loop_cont   # continue back from get_minimum_index procedure's loop
