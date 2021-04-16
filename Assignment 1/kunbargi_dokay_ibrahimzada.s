@@ -425,24 +425,28 @@ q3:
 
 # initilize array with ones in stack 
 q3_array:
-    sw	$s1, ($sp)	# write ones to the stackpointer's address
+    sw	$s1, 0($sp)	# write ones to the stackpointer's address
 	addi $t1, $t1, 1	# increment counter variable
 	addi $sp, $sp, -4	# subtract 4 bytes from stackpointer (push)
-	ble	$t1, $t0, q3_array	# take loop while $t1 <= $t0 ( p <= N )
+    
+    slt $t5, $t1, $t0
+	bne	$t5, $zero, q3_array	# take loop while $t1 <= $t0 ( p <= N )
 
     li $t1, 1 # counter p reseted to 1
     
 q3_outer_while:
     addi $t1, $t1, 1 # increment p at each iteration
     mul $t2, $t1, $t1 # save  p * p -> $t2
-    bgt $t2, $t0, q3_precounter # exit loop if p*p > N 
+
+    slt $t5, $t0, $t2
+    bne $t5, $zero, q3_precounter # exit loop if p*p > N 
 
     add	$t4, $s3, $zero	# save the bottom of stack address to $t4
 	mul	$t3, $t1, 4	# calculate the number of bytes to jump over t1=p
 	sub	$t4, $t4, $t3	# subtract them from bottom of stack address, save prime[p] -> t4
 	add	$t4, $t4, 8	# add 2 words, we started counting from 2
 
-	lw	$t3, ($t4)	# load the content into $t3
+	lw	$t3, 0($t4)	# load the content into $t3
 	beq	$t3, $s1, q3_inner_for	# go to the inner loop if prime[p] == true
     
     j q3_outer_while
@@ -458,8 +462,9 @@ q3_inner_for:
 	sw	$s0, ($t4)	# store false there ( 0's ) because it's not a prime number
 
 	add	$t2, $t2, $t1	# keep doing this for every multiple of $t1
-     
-	ble $t2, $t0, q3_inner_for # stay in loop while ( p*p <= N )
+
+    slt $t5, $t0, $t2 
+	beq $t5, $zero, q3_inner_for # stay in loop while ( p*p <= N )
 
     j q3_outer_while # go back to outer loop when all multiples are done
 
@@ -478,7 +483,8 @@ q3_counter:
 
 	beq	$t3, $s1, q3_if_counter	# increment prime counter if prime[p] == true
 
-    bgt $t9, $t0, q3_exit # jump to exit if t9 > N
+    slt $t5, $t0, $t9
+    bne $t5, $zero, q3_exit # jump to exit if t9 > N
     j q3_counter 
 
 q3_if_counter:
