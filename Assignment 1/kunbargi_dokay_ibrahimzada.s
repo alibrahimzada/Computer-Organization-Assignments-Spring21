@@ -8,6 +8,8 @@ q2_output_string:   .asciiz "Output: "
 q3_enter_integer:   .asciiz "\nEnter N between 2 and 1,000,000\n"
 q3_output1:         .asciiz "\nprime("
 q3_output2:         .asciiz ") is "
+q4_enter_string:    .asciiz "\nEnter the string to construct Huffman Code: "
+q4_enter_string_convert:    .asciiz "\nEnter the string to be converted using Huffman Code: "
 termination:        .asciiz "Program ends. Bye :)"
 line_break:         .asciiz "\n"
 char_occurrence:    .asciiz "Character Occurrence\n"
@@ -87,6 +89,27 @@ case_4: # case 4 corresponds to constructing Huffman Code Tree
 
     addi $t1, $zero, 4  # assign 4 to $t1 for case testing
     bne $t0, $t1, case_5    # branch to case 5 if the user did not enter 4
+
+    li $v0, 4   # print string (i.e., Enter the string to construct Huffman Coding) to standard output
+    la $a0, q4_enter_string
+    syscall
+
+    li $v0, 8
+    syscall
+
+    move $t0, $a0
+
+    li $v0, 4   # print string (i.e., Enter the string to convert) to standard output
+    la $a0, q4_enter_string_convert
+    syscall
+
+    li $v0, 8
+    syscall
+
+    move $a1, $a0
+    move $a0, $t0
+
+    jal q4
 
     j main_while    # restart with main menu and ask user for input
 
@@ -178,7 +201,6 @@ q1_loop_next_iter:  # this is used to increment the loop variable because we ski
 
 q1_print:   # we use this to print the sorted frequencies from stack
 
-    ### necessary calls to sorting should be made here
     add $a0, $sp, $zero
     li $a1, 0
     addi $a1, $a1, 26
@@ -513,6 +535,18 @@ q3_exit:
 	syscall		
 
     jr	$ra		# exit q3
+
+q4:
+    addi $sp, $sp, -8   # creating space to preserve the values of arguments (i.e., $a0, $a1, etc.)
+    sw $a0, 4($sp)  # pushing arguments to stack
+    sw $a1, 0($sp)
+
+    jal q1
+
+    lw $a1, 0($sp)  # restore the arguments from stack
+    lw $a0, 4($sp)
+    addi $sp, $sp, 8
+    j main_while  # jump back to main menu loop
 
 sort_algorithm:
     addi $sp, $sp, -4		# create space for return address on stack
