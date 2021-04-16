@@ -3,6 +3,8 @@
 welcome_message:    .asciiz "Welcome to our MIPS project!\n"
 main_menu:          .asciiz "\n\nMain Menu:\n1. Count Alphabetic Characters\n2. Sort Numbers\n3. Prime (N)\n4. Huffman Coding\n5. Exit\nPlease select an option: "
 q1_enter_string:    .asciiz "\nEnter the String: "
+q2_enter_string:    .asciiz "\nInput: "
+q2_output_string:   .asciiz "Output: "
 q3_enter_integer:   .asciiz "\nEnter N between 2 and 1,000,000\n"
 q3_output1:         .asciiz "\nprime("
 q3_output2:         .asciiz ") is "
@@ -10,6 +12,7 @@ termination:        .asciiz "Program ends. Bye :)"
 line_break:         .asciiz "\n"
 char_occurrence:    .asciiz "Character Occurrence\n"
 space:              .asciiz "         "
+space_by_1:              .ascii " "
 
     .text
     .globl main
@@ -52,9 +55,14 @@ case_2: # case 2 corresponds to sorting a sequence of unordered numbers in a str
     addi $t1, $zero, 2  # assign 2 to $t1 for case testing
     bne $t0, $t1, case_3    # branch to case 3 if the user did not enter 2
 
-    ### Alper please do the necessary input taking and calling q2 below (check case 1 for reference)
+    li $v0, 4   # print string to standard output
+    la $a0, q2_enter_string
+    syscall
 
-    ### Alper please finish your code before this line
+    li $v0, 8   # get string from user
+    syscall
+
+    jal q2
 
     j main_while    # restart with main menu and ask user for input
 
@@ -310,6 +318,265 @@ swap:		sll	$t1, $a1, 2		# i * 4
 		sw	$t0, 0($t2)		# v[j] = $t0
 
 		jr	$ra
+
+
+# Initiation of q2
+q2:
+    addi $sp, $sp, -8   # creating space to preserve the values of arguments
+    sw $a0, 4($sp)
+    sw $a1, 0($sp)
+
+    move  $s0, $a0  # get string to $s0
+
+    # definitions
+    li $t0, 0   # loop variable (i)
+    li $t3, 0   # to keep the length of substring 1 54 108
+    li $t4, 0   # to store the array
+    li $t6, 1   # multiplier
+    li $t8, 10  # just number
+    li $s2, 0   # number of elements
+    li $s3, 0   # is negative
+    j q2_create_stack  # calling create stack func
+
+# Here we start reading string and filling the stack with numbers by converting them to integer
+q2_create_stack:
+    add $t1, $s0, $t0   # &charArray[i]
+    li $t2, 0
+    lb $t2, 0($t1)   # charArray[i]
+
+    slti $t9, $t2, 31   # checking if the given value is smaller than 31 as ASCII character, if it ignore it
+    bne $t9, $zero, q2_convert_to_integer_last   # it means it is the end of string, go to the last operation
+
+    beq $t2, 45, q2_activate_negative  # if there is a dash inside the substring, make the $s3 1 to get negativity
+    beq $t2, 32, q2_convert_to_integer # if it sees a space, stop getting more, and call the conversion func
+
+    j q2_store_value  # call store func
+
+# This is the place where we active the register s3 for a while to check the negativity
+q2_activate_negative:
+    li $s3, 1  # make the variable s3 1 so that we can check negativity before we cumulatively sum the number 
+    addi $t0, $t0, 1  # increment the loop counter
+    j q2_create_stack  # get back to the loop
+
+# This is the place where we push the new character to stack
+q2_store_value:
+    addi $sp, $sp, -4  # create a new space in stack
+    sw $t2, 0($sp)  # assign that number to stack in ASCII form
+
+    j q2_outer_loop_next_iter  # call loop increment func
+
+# Increment the loop counter and the length of substring
+q2_outer_loop_next_iter:
+    addi $t0, $t0, 1  # increment the loop counter
+    addi $t3, $t3, 1  # increment the length of substring
+    j q2_create_stack  # get back to the loop
+
+# This is the function converts the ascii consecutive numbers to integer    		
+q2_convert_to_integer:
+    beq $t3, $zero, q2_check_negativity  # once it is done, go to the check negativity func
+
+    lw $t4, 0($sp)
+    addi $t4, $t4, -48  # substract 48 from the ascii value to get the real integer value
+
+    mul $t7, $t6, $t4  # multiply the number with its coefficient. (e.g 1, 10, 100)
+
+    add $t5, $t5, $t7 # add the multiplied value to the total sum
+
+    mul $t6, $t6, $t8  # multiply the coefficient by 10
+    
+    addi $t3, $t3, -1  # decrement the length (aka loop counter here)
+    addi $sp, $sp, 4  # go up in stack to get the next value (it reads from right to left)
+    j q2_convert_to_integer  # get back to the beginning
+
+# Here is the place where we check negativity
+q2_check_negativity:
+    beq $s3, 1, q2_make_negative  # if negatve, call negative
+    j q2_save_value  # if not, go directly to the save_value func
+
+# Here is the place where we make the number negative
+q2_make_negative:
+    sub $t5, $zero, $t5  # substract the value from 0 to get its negative value
+    j q2_save_value  # call save_value func
+
+# Here is the place where we save the whole number get by the characters
+q2_save_value:
+    addi $sp, $sp, -4  # go one level down to create space for the real integer number
+    sw $t5, 0($sp)  # store the number
+    
+    # resetting the registers
+    li $t5, 0
+    li $t4, 0   # to store the element
+    li $t6, 1
+    li $t8, 10
+    li $s3, 0
+    addi $s2, $s2, 1  # increment the number of elements in total given in string
+    addi $t0, $t0, 1  # incrementing the loop counter
+    j q2_create_stack  # get back to the loop
+
+# This is the function converts the ascii consecutive numbers to integer for the last number
+q2_convert_to_integer_last:
+    beq $t3, $zero, q2_check_negativity_last # once it is done, go to the check negativity func
+    
+    lw $t4, 0($sp)
+    addi $t4, $t4, -48 # substract 48 from the ascii value to get the real integer value
+
+    mul $t7, $t6, $t4 # multiply the number with its coefficient. (e.g 1, 10, 100)
+
+    add $t5, $t5, $t7 # add the multiplied value to the total sum
+
+    mul $t6, $t6, $t8 # multiply the coefficient by 10
+    
+    addi $t3, $t3, -1 # decrement the length (aka loop counter here)
+    addi $sp, $sp, 4 # go up in stack to get the next value (it reads from right to left)
+    j q2_convert_to_integer_last # get back to the beginning
+
+# Here is the place where we save the whole number (last number in string) get by the characters
+q2_save_value_last:
+    addi $sp, $sp, -4 # go one level down to create space for the real integer number
+    sw $t5, 0($sp) # store the number
+    
+    # resetting the registers
+    li $t5, 0
+    li $t4, 0  
+    li $t6, 1
+    li $t8, 10
+    li $t0, 0
+    li $t1, 0
+    li $t2, 0
+    li $s3, 0
+    addi $s2, $s2, 1  # increment the number of elements in total given in string
+    addi $t0, $t0, 1  # incrementing the loop counter
+
+    move	$a0, $sp # $a0=base address af the array
+	move	$a1, $s2 # $a1=size of the array
+    jal	q2_isort # call sorting func
+    j q2_print_array # print after sorting
+
+# Here is the place where we check negativity for the last value
+q2_check_negativity_last:
+    beq $s3, 1, q2_make_negative_last  # if negatve, call negative
+    j q2_save_value_last  # if not, go directly to the save_value func
+
+# Here is the place where we make the number negative
+q2_make_negative_last:
+    sub $t5, $zero, $t5  # substract the value from 0 to get its negative value
+    j q2_save_value_last  # call save_value func
+
+q2_exit:
+    j main_while  # jump back to main menu loop
+
+
+q2_isort:	
+        addi	$sp, $sp, -4		# save values on stack
+		sw	$ra, 0($sp)
+
+		move 	$s0, $a0		# base address of the array
+		move	$s1, $zero		# i=0
+
+		addi	$s2, $a1, -1		# lenght -1
+
+q2_isort_for:	
+        bge 	$s1, $s2, q2_isort_exit	# if i >= length-1 -> exit loop
+		
+		move	$a0, $s0		# base address
+		move	$a1, $s1		# i
+		move	$a2, $s2		# length - 1
+		
+		jal	q2_mini
+		move	$s3, $v0		# return value of mini
+		
+		move	$a0, $s0		# array
+		move	$a1, $s1		# i
+		move	$a2, $s3		# mini
+		
+		jal	q2_swap
+
+		addi	$s1, $s1, 1		# i += 1
+		j	q2_isort_for		# go back to the beginning of the loop
+		
+q2_isort_exit:	
+        lw	$ra, 0($sp)		# restore values from stack
+		addi	$sp, $sp, 4		# restore stack pointer
+		jr	$ra			# return
+
+
+# index_minimum routine
+q2_mini:		
+        move	$t0, $a0		# base of the array
+		move	$t1, $a1		# mini = first = i
+		move	$t2, $a2		# last
+		
+		sll	$t3, $t1, 2		# first * 4
+		add	$t3, $t3, $t0		# index = base array + first * 4		
+		lw	$t4, 0($t3)		# min = v[first]
+		
+		addi	$t5, $t1, 1		# i = 0
+
+q2_mini_for:	
+        bgt	$t5, $t2, q2_mini_end	# go to min_end
+
+		sll	$t6, $t5, 2		# i * 4
+		add	$t6, $t6, $t0		# index = base array + i * 4		
+		lw	$t7, 0($t6)		# v[index]
+
+		bge	$t7, $t4, q2_mini_if_exit	# skip the if when v[i] >= min
+		
+		move	$t1, $t5		# mini = i
+		move	$t4, $t7		# min = v[i]
+
+q2_mini_if_exit:	
+        addi	$t5, $t5, 1		# i += 1
+		j	q2_mini_for
+
+q2_mini_end:	move 	$v0, $t1		# return mini
+		jr	$ra
+
+
+# swap routine
+q2_swap:		
+        sll	$t1, $a1, 2		# i * 4
+		add	$t1, $a0, $t1		# v + i * 4
+		
+		sll	$t2, $a2, 2		# j * 4
+		add	$t2, $a0, $t2		# v + j * 4
+
+		lw	$t0, 0($t1)		# v[i]
+		lw	$t3, 0($t2)		# v[j]
+
+		sw	$t3, 0($t1)		# v[i] = v[j]
+		sw	$t0, 0($t2)		# v[j] = $t0
+
+		jr	$ra
+
+# Here is the place where we print the values in stack (aka array)
+q2_print_array:
+    # loop definitions
+	li $t4, 0
+	li $t2, 0
+    addi $s2, $s2, 1  # length index is incremented by one to get all numbers
+	
+	q2_print_array_loop_inner:  # initiate loop
+	
+		beq $s2, $zero, q2_print_array_loop_end
+	
+        # print the first value
+		li $v0, 1
+		lw $a0, 0($s0)
+		syscall
+
+        # put space
+        li $v0, 4
+        la $a0, space_by_1
+        syscall
+
+        # go one level up and decrement the loop counter
+		addi $s0, $s0, 4
+		addi $s2, $s2, -1
+		j q2_print_array_loop_inner  # get back to the loop
+	
+	q2_print_array_loop_end:
+        j q2_exit
+
 
 q3:
     add $s0, $zero, $zero # False variable
