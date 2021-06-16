@@ -118,11 +118,11 @@ adder add1(pc,32'h4,adder1out);
 adder add2(adder1out,sextad,adder2out);
 
 //Control unit
-control cont(instruc[31:26],regdest,alusrc,memtoreg,regwrite,memread,memwrite,
+control cont(inst31_26,regdest,alusrc,memtoreg,regwrite,memread,memwrite,
 aluop1,aluop0,bj2,bj1,bj0);
 
 //Sign extend unit
-signext sext(instruc[15:0],extad);
+signext sext(inst15_0,extad);
 
 //ALU control unit
 alucont acont(aluop1,aluop0,instruc[3],instruc[2], instruc[1], instruc[0] ,gout);
@@ -134,7 +134,7 @@ jbcont jbcont(bj2,bj1,bj0,zout,nout,pcsrc,jspal,balrzWrite);
 shift shift2(sextad,extad);
 
 //Shift-left 2 unit the jump address
-jumpaddresscalc shift3(jumpout,inst25_0,adder1out);
+jumpaddresscalc jac1(jumpout,inst25_0,adder1out);
 
 //initialize datamemory,instruction memory and registers
 //read initial data from files given in hex
