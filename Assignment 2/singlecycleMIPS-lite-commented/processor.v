@@ -31,12 +31,11 @@ wire [31:0] instruc,	//current instruction
 dpack;	//Read data output of memory (data read from memory)
 
 wire [4:0] gout;	//Output of ALU control unit
-wire [1:0] pcsrc;	//Output of jb control unit
 
 wire zout,	//Zero output of ALU
 nout,		//Negative output of ALU
 //Control signals
-regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,jspal,balrzWrite,balrz;
+regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,jspal,balrzWrite,balrz,pcsrc1,pcsrc0;
 
 //32-size register file (32 bit(1 word) for each register)
 reg [31:0] registerfile[0:31];
@@ -91,7 +90,7 @@ mult2_to_1_32 mult3(out3, sum,dpack,memtoreg);
 mult2_to_1_32 mult4(out4, out3,adder1out,balrzWrite);
 
 //mux with PCSrc control
-mult4_to_1_32 mult5(out5, adder1out,jumpout,adder2out,dataa,pcsrc);
+mult4_to_1_32 mult5(out5, adder1out,jumpout,adder2out,dataa,pcsrc1,pcsrc0);
 
 //mux with JSPAL control
 mult2_to_1_32 mult6(out6, datab,adder1out,jspal);
@@ -128,7 +127,7 @@ signext sext(inst15_0,extad);
 alucont acont(aluop1,aluop0,instruc[3],instruc[2], instruc[1], instruc[0] ,gout);
 
 //JB control unit
-jbcont jbcont(bj2,bj1,bj0,zout,nout,pcsrc,jspal,balrzWrite);
+jbcont jbcont1(bj2,bj1,bj0,zout,nout,pcsrc1,pcsrc0,jspal,balrzWrite);
 
 //Shift-left 2 unit
 shift shift2(sextad,extad);
