@@ -1,6 +1,6 @@
-module control(in,regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop0,aluop1,bj0,bj1,bj2);
+module control(in,regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0);
 input [5:0] in;
-output regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop0,aluop1,bj0,bj1,bj2;
+output regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0;
 wire rformat,lw,sw,beq,bltz,nori,bz,jspal,j;
 assign rformat=~|in;
 assign lw=in[5]& (~in[4])&(~in[3])&(~in[2])&in[1]&in[0];
