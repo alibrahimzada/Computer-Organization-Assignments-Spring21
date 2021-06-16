@@ -96,10 +96,11 @@ mult4_to_1_32 mult5(out5, adder1out,jumpout,adder2out,dataa,pcsrc1,pcsrc0);
 mult2_to_1_32 mult6(out6, datab,adder1out,jspal);
 
 //mux with balrz control
-mult2_to_1_3 mult7(bj2,bj1,bj0,3'b100,balrz);
+// mult2_to_1_3 mult7(bj2,bj1,bj0,3'b100,balrz);
 
 // load pc
 always @(negedge clk)
+// pc=out5;
 pc=out5;
 
 // alu, adder and control logic connections
