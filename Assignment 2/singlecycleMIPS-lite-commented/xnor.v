@@ -1,5 +1,5 @@
-module xnor(a, b, out);
-input [4:0] a,b;
+module xnor_gate(a,b,out);
+input [5:0] a,b;
 output out;
-assign out = ~ (~A&&B || A&&~B);
+assign out=&(a^~b);
 endmodule
