@@ -35,7 +35,7 @@ wire [4:0] gout;	//Output of ALU control unit
 wire zout,	//Zero output of ALU
 nout,		//Negative output of ALU
 //Control signals
-regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,jspal,balrzWrite,balrz,pcsrc1,pcsrc0;
+regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,jspal,balrzWrite,balrz,pcsrc1,pcsrc0,mode;
 
 //32-size register file (32 bit(1 word) for each register)
 reg [31:0] registerfile[0:31];
@@ -109,7 +109,7 @@ pc=out5;
 xnor_gate xnor1(instruc[5:0],6'b010110,balrz);
 
 //ALU unit
-alu32 alu1(sum,dataa,out2,zout,nout,gout);
+alu32 alu1(sum,dataa,out2,mode,zout,nout,gout);
 
 //adder which adds PC and 4
 adder add1(pc,32'h4,adder1out);
@@ -119,7 +119,7 @@ adder add2(adder1out,sextad,adder2out);
 
 //Control unit
 control cont(inst31_26,regdest,alusrc,memtoreg,regwrite,memread,memwrite,
-aluop1,aluop0,bj2,bj1,bj0);
+aluop1,aluop0,bj2,bj1,bj0,mode);
 
 //Sign extend unit
 signext sext(inst15_0,extad);
