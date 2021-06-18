@@ -18,7 +18,7 @@ begin
 		  	  end
 	5'b00000: sum=a & b;	//ALU control line=00000, AND
 	5'b00001: sum=a|b;		//ALU control line=00001, OR
-	5'b00100: sum=a>>b;		//ALU control line=00100, SRL
+	5'b00100: sum=b>>a;		//ALU control line=00100, SRL
 	5'b11000: sum=~(a|b);	//ALU control line=11000, NOR
 	default: sum=31'bx;	
 	endcase

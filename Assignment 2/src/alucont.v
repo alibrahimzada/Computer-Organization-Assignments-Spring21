@@ -4,9 +4,9 @@ output [4:0] gout;					// 5-bit output from ALU control unit
 reg [4:0] gout;
 always @(aluop1 or aluop0 or f3 or f2 or f1 or f0)
 begin
-if(aluop1&aluop0) gout=5'b11000;	// checking if instruction is nor
 if(~(aluop1|aluop0))  gout=5'b00010;// checking if instruction is lw/sw/jspal
 if(aluop0)gout=5'b01010;			// checking if instruction is bltz/beq
+if(aluop1&aluop0) gout=5'b11000;	// checking if instruction is nor
 if(aluop1)							// checking if R-format instruction
 begin
 	if (~(f3|f2|f1|f0))gout=5'b00010; 	//function code=0000,ALU control=00010 (add)
