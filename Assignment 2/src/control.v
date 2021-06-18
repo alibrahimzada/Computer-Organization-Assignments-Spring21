@@ -17,10 +17,10 @@ assign memtoreg=lw;
 assign regwrite=rformat|lw|nori;
 assign memread=lw;
 assign memwrite=sw|jspal;
-assign aluop0=beq|bltz|nori;
+assign aluop0=beq|nori;
 assign aluop1=rformat|nori;
 assign bj0=bltz|bz|jspal;
 assign bj1=jspal|j|beq;
 assign bj2=bltz|beq;
-assign mode=bltz|bz;
+assign mode=bz;
 endmodule
