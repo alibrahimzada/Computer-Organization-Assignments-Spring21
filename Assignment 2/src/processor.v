@@ -95,18 +95,12 @@ mult4_to_1_32 mult5(out5, adder1out,jumpout,adder2out,dataa,pcsrc1,pcsrc0);
 //mux with JSPAL control
 mult2_to_1_32 mult6(out6, datab,adder1out,jspal);
 
-//mux with balrz control
-// mult2_to_1_3 mult7(bj2,bj1,bj0,3'b100,balrz);
-
 // load pc
 always @(negedge clk)
 // pc=out5;
 pc=out5;
 
 // alu, adder and control logic connections
-
-//xnor unit
-xnor_gate xnor1(instruc[5:0],6'b010110,balrz);
 
 //ALU unit
 alu32 alu1(sum,dataa,out2,mode,zout,nout,gout);
@@ -118,7 +112,7 @@ adder add1(pc,32'h4,adder1out);
 adder add2(adder1out,sextad,adder2out);
 
 //Control unit
-control cont(inst31_26,regdest,alusrc,memtoreg,regwrite,memread,memwrite,
+control cont(inst31_26,balrz,regdest,alusrc,memtoreg,regwrite,memread,memwrite,
 aluop1,aluop0,bj2,bj1,bj0,mode);
 
 //Sign extend unit
@@ -135,6 +129,9 @@ shift shift2(sextad,extad);
 
 //Shift-left 2 unit the jump address
 jumpaddresscalc jac1(jumpout,inst25_0,adder1out);
+
+//xnor unit
+xnor_gate xnor1(instruc[5:0],6'b010110,balrz);
 
 //initialize datamemory,instruction memory and registers
 //read initial data from files given in hex

@@ -1,5 +1,6 @@
-module control(in,regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,mode);
+module control(in,balrz,regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,mode);
 input [5:0] in;
+input balrz;
 output regdest,alusrc,memtoreg,regwrite,memread,memwrite,aluop1,aluop0,bj2,bj1,bj0,mode;
 wire rformat,lw,sw,beq,bltz,nori,bz,jspal,j;
 assign rformat=~|in;
@@ -21,6 +22,6 @@ assign aluop0=beq|nori;
 assign aluop1=rformat|nori;
 assign bj0=bltz|bz|jspal;
 assign bj1=jspal|j|beq;
-assign bj2=bltz|beq;
-assign mode=bz;
+assign bj2=bltz|beq|balrz;
+assign mode=bz|balrz;
 endmodule
