@@ -1,7 +1,7 @@
 module alu32(sum,a,b,mode,zout,nout,gin);	//ALU operation according to the ALU control line values
 output [31:0] sum;	// 32-bit output which represents the result of ALU
 input [31:0] a,b;	// 32-bit inputs which represent the input to the ALU
-input mode;
+input mode;			// mode bit is used to decide if we need to update the status register bits
 input [4:0] gin;	//ALU control line represented in 5 bits (i.e., [bit4: Ainvert, bit3: BNegate, bit2-0: Operation])
 reg [31:0] sum;
 reg [31:0] less;
@@ -22,7 +22,7 @@ begin
 	5'b11000: sum=~(a|b);	//ALU control line=11000, NOR
 	default: sum=31'bx;	
 	endcase
-if (~mode) begin
+if (~mode) begin	// checking if mode bit is 0/1
 zout=~(|sum);	//setting the zero output based on the result of arithmetic operation
 nout=sum[31];	//setting the negative output based on the result of arithmetic operation	
 end

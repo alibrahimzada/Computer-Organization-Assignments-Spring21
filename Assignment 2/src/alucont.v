@@ -14,7 +14,7 @@ begin
 	if (f1&~(f3))gout=5'b01010;			//function code=0x10,ALU control=01010 (sub)
 	if (f2&f0)gout=5'b00001;			//function code=x1x1,ALU control=00001 (or)
 	if (f2&~(f0))gout=5'b00000;			//function code=x1x0,ALU control=00000 (and)
-	if (f2&f1)gout=5'b00100;				//function code=x11x,ALU control=00100 (shift right)
+	if (f2&f1)gout=5'b00100;			//function code=x11x,ALU control=00100 (shift right)
 end
 end
 endmodule
