@@ -1,0 +1,7 @@
+// memory data file (do not edit the following line - required for mem load use)
+// instance=/processor/mem
+// format=mti addressradix=h dataradix=s version=1.0 wordsperline=8
+ 0: 00000000 00000000 00000000 00000000 00000001 00101010 01000000 00100010
+ 8: 00000001 01001011 01000000 00100010 01100000 00000000 00000000 00000101
+10: xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx 00000001 10000000 11111000 00010110
+18: xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
